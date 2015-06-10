@@ -5,7 +5,7 @@
  * @author Lee Keitel
  * @license MIT
  */
-namespace onesimus\Readline;
+namespace Onesimus\Readline;
 
 define('OS_WIN', PHP_OS == 'WINNT');
 
@@ -333,11 +333,24 @@ class Readline
 
     public function bindBackspace(Readline $self)
     {
-        $self->clearTerminalLine();
+        if ($self->getLineCurrent() > 0) {
+            if ($self->getLineLength() == $current = $self->getLineCurrent()) {
+                $self->setLine(mb_substr($self->getLine(), 0, -1));
+                $cursor = '';
+            } else {
+                $line    = $self->getLine();
+                $current = $self->getLineCurrent();
+                $tail    = mb_substr($line, $current);
+                $movecursor  = $self->getLineLength() - $current;
+                $cursor = "\033[{$movecursor}D";
+                $self->setLine(mb_substr($line, 0, $current - 1) . $tail);
+                $self->setLineCurrent($current - 1);
+            }
+        }
+
         $prefix = $self->getPrefix();
-        $line = mb_substr($self->getLine(), 0, $self->getLineLength()-1);
-        $self->setBuffer("\r".$prefix.$line);
-        $self->setLine($line);
+        $self->clearTerminalLine();
+        $self->setBuffer("\r".$prefix.$self->getLine().$cursor);
 
         return $self::READ_CONTINUE;
     }
