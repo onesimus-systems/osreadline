@@ -333,10 +333,10 @@ class Readline
 
     public function bindBackspace(Readline $self)
     {
+        $cursor = '';
         if ($self->getLineCurrent() > 0) {
             if ($self->getLineLength() == $current = $self->getLineCurrent()) {
                 $self->setLine(mb_substr($self->getLine(), 0, -1));
-                $cursor = '';
             } else {
                 $line    = $self->getLine();
                 $current = $self->getLineCurrent();
